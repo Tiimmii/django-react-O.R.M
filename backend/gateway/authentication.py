@@ -27,3 +27,45 @@ class Get_token():
             settings.SECRET_KEY,
             algorithm = "HS256"
         )
+    
+
+class Authentication(BaseAuthentication):
+    def authenticate(self, request):
+        data = self.validate_request(request.headers)
+        if not data:
+            return None, None
+        print(data["user"])
+        return self.get_user(data["user"]), None
+    
+    def get_user(self, user_id):
+        try:
+            user = Customuser.objects.get(id = user_id)
+            return user
+        except Exception:
+            return None
+        
+    def validate_request(self, headers):
+        authorization = headers.get("Authorization", None)
+        if not authorization:
+            raise Exception("You need to provide authorization")
+        token = headers["Authorization"][7:]
+        decoded_data = authorization.valid_token(token)
+        if not decoded_data:
+            raise Exception("Token not valid or expired")
+        return decoded_data
+    
+    @staticmethod
+    def valid_token(token):
+        try:
+            decoded_data = jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithm = "HS256",
+            )
+        except Exception:
+            return None
+        
+        if datetime.now() > decoded_data["exp"]:
+            return None
+        
+        return decoded_data

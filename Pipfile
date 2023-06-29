@@ -9,6 +9,7 @@ django-cors-headers = "*"
 python-decouple = "*"
 django = "*"
 psycopg2-binary = "*"
+pyjwt = "*"
 
 [dev-packages]
 

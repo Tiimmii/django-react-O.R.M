@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'customuser',
     'rest_framework',
     'corsheaders',
+    'gateway',
 ]
 
 MIDDLEWARE = [

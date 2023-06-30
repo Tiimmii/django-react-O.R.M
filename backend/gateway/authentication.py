@@ -51,21 +51,17 @@ class Authentication(BaseAuthentication):
         token = headers["Authorization"][7:]
         decoded_data = authorization.valid_token(token)
         if not decoded_data:
-            raise Exception("Token not valid or expired")
+            raise Exception("Token not valid or expired you may need to login again")
         return decoded_data
     
     @staticmethod
     def valid_token(token):
         try:
-            decoded_data = jwt.decode(
-                token,
-                settings.SECRET_KEY,
-                algorithm = "HS256",
-            )
+            decoded_data = jwt.decode(token, settings.SECRET_KEY, algorithms="HS256")
         except Exception:
             return None
         
-        if datetime.now() > decoded_data["exp"]:
+        if datetime.now().timestamp() > decoded_data["exp"]:
             return None
         
         return decoded_data

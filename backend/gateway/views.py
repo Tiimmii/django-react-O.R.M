@@ -15,7 +15,7 @@ class Registerview(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        Customuser.objects.create(**serializer.validated_data)
+        Customuser.objects.create_user(**serializer.validated_data)
         user = Customuser.objects.get(email=serializer.validated_data["email"])
 
         access = Get_token.get_access_token({"user": user.id})
@@ -32,16 +32,17 @@ class LoginView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = authenticate(username=serializer.validated_data["email"], password=serializer.validated_data["password"])
+        user = authenticate(email=serializer.validated_data["email"], password=serializer.validated_data["password"])
         if not user:
-            return Response({"message": "invalid username or password"}, status = "400")
-        
+            return Response({"message": "invalid email or password"}, status = "400")
+        logged_in_user = Customuser.objects.get(email = serializer.validated_data['email'])
         try:
-            active_jwt = Jwt.objects.get(user=user)
+            active_jwt = Jwt.objects.get(user = logged_in_user)
         except Jwt.DoesNotExist:
             return Response({"error": "refresh token not found"}, status="400")
         
         if not Authentication.valid_token(active_jwt.refresh_token):
+            print(Authentication.valid_token(active_jwt.refresh_token))
             access_token = Get_token.get_access_token({"user_id": active_jwt.user.id})
             refresh_token = Get_token.get_refresh_token()
 
